@@ -37,7 +37,6 @@ INT_VECT:
     MOVWF   STATUS
     SWAPF   W_TMP, F
     SWAPF   W_TMP, W
-    
     RETFIE
 
 ; program variables
@@ -112,21 +111,18 @@ main:
 turnOffLEDs:
     MOVLW   0b00000000
     MOVWF   PORTC
-    
     RETURN
 
 ; subroutine to light the LED in RC0
 turnOnLEDRC0:
     MOVLW   0b00000001
     MOVWF   PORTC
-    
     RETURN
 
 ; subroutine to light the LED in RC1
 turnOnLEDRC1:
     MOVLW   0b00000010
     MOVWF   PORTC
-    
     RETURN
 
 END RESET_VECT
