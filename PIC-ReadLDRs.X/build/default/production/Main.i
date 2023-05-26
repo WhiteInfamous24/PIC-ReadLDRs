@@ -2491,6 +2491,8 @@ INT_VECT:
 ; program variables
 W_TMP EQU 0x20
 STATUS_TMP EQU 0x21
+
+; LDRs
 AN0_VALUE EQU 0x22
 AN1_VALUE EQU 0x23
 
@@ -2499,24 +2501,24 @@ setup:
 
     ; ports configuration
     BANKSEL TRISA
-    MOVLW 0b00000011 ; set AN0 and AN1 as inputs
+    MOVLW 0b00000011 ; set <AN0:AN1> as inputs
     MOVWF TRISA
-    BANKSEL TRISB
-    MOVLW 0b00000000 ; set ((PORTB) and 07Fh), 0, ((PORTB) and 07Fh), 1, ((PORTB) and 07Fh), 2 & ((PORTB) and 07Fh), 3 as outputs
-    MOVWF TRISB
+    BANKSEL TRISC
+    MOVLW 0b00000000 ; set <((PORTC) and 07Fh), 0:((PORTC) and 07Fh), 3> as outputs
+    MOVWF TRISC
     BANKSEL ANSEL
     MOVLW 0b00000011 ; enable analog inputs on AN0 and AN1
     MOVWF ANSEL
 
     ; ADC configuration
     BANKSEL VRCON ; set the reference voltage
-    MOVLW 0b00000000 ; ((VRCON) and 07Fh), 7 - ((VRCON) and 07Fh), 6 - ((VRCON) and 07Fh), 5 - ((VRCON) and 07Fh), 4 - ((VRCON) and 07Fh), 3 - ((VRCON) and 07Fh), 2 - ((VRCON) and 07Fh), 1 - ((VRCON) and 07Fh), 0
+    MOVLW 0b00000000 ; | ((VRCON) and 07Fh), 7 | ((VRCON) and 07Fh), 6 | ((VRCON) and 07Fh), 5 | ((VRCON) and 07Fh), 4 | ((VRCON) and 07Fh), 3 | ((VRCON) and 07Fh), 2 | ((VRCON) and 07Fh), 1 | ((VRCON) and 07Fh), 0 |
     MOVWF VRCON
     BANKSEL ADCON0 ; set the clock, set the input channel AN0 and turn on the ADC
-    MOVLW 0b10000001 ; ((ADCON0) and 07Fh), 7 - ((ADCON0) and 07Fh), 6 - ((ADCON0) and 07Fh), 5 - ((ADCON0) and 07Fh), 4 - ((ADCON0) and 07Fh), 3 - ((ADCON0) and 07Fh), 2 - ((ADCON0) and 07Fh), 1/DONE - ((ADCON0) and 07Fh), 0
+    MOVLW 0b10000001 ; | ((ADCON0) and 07Fh), 7 | ((ADCON0) and 07Fh), 6 | ((ADCON0) and 07Fh), 5 | ((ADCON0) and 07Fh), 4 | ((ADCON0) and 07Fh), 3 | ((ADCON0) and 07Fh), 2 | ((ADCON0) and 07Fh), 1/DONE | ((ADCON0) and 07Fh), 0 |
     MOVWF ADCON0
     BANKSEL ADCON1 ; select the reference voltage source (VDD and VSS)
-    MOVLW 0b00000000 ; ((ADCON1) and 07Fh), 7 - xx - ((ADCON1) and 07Fh), 5 - ((ADCON1) and 07Fh), 4 - xx - xx - xx - xx
+    MOVLW 0b00000000 ; | ((ADCON1) and 07Fh), 7 | xx | ((ADCON1) and 07Fh), 5 | ((ADCON1) and 07Fh), 4 | xx | xx | xx | xx |
     MOVWF ADCON1
 
 ; main program loop
@@ -2547,31 +2549,31 @@ main:
     GOTO turnOffLEDs
     BTFSC STATUS, 2
     GOTO $+5
-    BTFSS STATUS, 0 ; if the result is positive, turn on the LED in ((PORTB) and 07Fh), 0
-    CALL turnOnLEDRB0
-    BTFSC STATUS, 0 ; if the result is negative, turn on the LED in ((PORTB) and 07Fh), 1
-    CALL turnOnLEDRB1
+    BTFSS STATUS, 0 ; if the result is positive, turn on the LED in ((PORTC) and 07Fh), 0
+    CALL turnOnLEDRC0
+    BTFSC STATUS, 0 ; if the result is negative, turn on the LED in ((PORTC) and 07Fh), 1
+    CALL turnOnLEDRC1
 
     GOTO main
 
 ; subroutine to turn off all LEDs
 turnOffLEDs:
     MOVLW 0b00000000
-    MOVWF PORTB
+    MOVWF PORTC
 
     RETURN
 
-; subroutine to light the LED in ((PORTB) and 07Fh), 0
-turnOnLEDRB0:
+; subroutine to light the LED in ((PORTC) and 07Fh), 0
+turnOnLEDRC0:
     MOVLW 0b00000001
-    MOVWF PORTB
+    MOVWF PORTC
 
     RETURN
 
-; subroutine to light the LED in ((PORTB) and 07Fh), 1
-turnOnLEDRB1:
+; subroutine to light the LED in ((PORTC) and 07Fh), 1
+turnOnLEDRC1:
     MOVLW 0b00000010
-    MOVWF PORTB
+    MOVWF PORTC
 
     RETURN
 

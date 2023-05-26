@@ -43,6 +43,8 @@ INT_VECT:
 ; program variables
 W_TMP	    EQU 0x20
 STATUS_TMP  EQU	0x21
+
+; LDRs
 AN0_VALUE   EQU 0x22
 AN1_VALUE   EQU 0x23
 
@@ -51,24 +53,24 @@ setup:
     
     ; ports configuration
     BANKSEL TRISA
-    MOVLW   0b00000011		; set AN0 and AN1 as inputs
+    MOVLW   0b00000011		; set <AN0:AN1> as inputs
     MOVWF   TRISA
-    BANKSEL TRISB
-    MOVLW   0b00000000		; set RB0, RB1, RB2 & RB3 as outputs
-    MOVWF   TRISB
+    BANKSEL TRISC
+    MOVLW   0b00000000		; set <RC0:RC3> as outputs
+    MOVWF   TRISC
     BANKSEL ANSEL
     MOVLW   0b00000011		; enable analog inputs on AN0 and AN1
     MOVWF   ANSEL
 
     ; ADC configuration
     BANKSEL VRCON		; set the reference voltage
-    MOVLW   0b00000000		; VREN - VROE - VRR - VRSS - VR3 - VR2 - VR1 - VR0
+    MOVLW   0b00000000		; | VREN | VROE | VRR | VRSS | VR3 | VR2 | VR1 | VR0 |
     MOVWF   VRCON
     BANKSEL ADCON0		; set the clock, set the input channel AN0 and turn on the ADC
-    MOVLW   0b10000001		; ADCS1 - ADCS0 - CHS3 - CHS2 - CHS1 - CHS0 - GO/DONE - ADON
+    MOVLW   0b10000001		; | ADCS1 | ADCS0 | CHS3 | CHS2 | CHS1 | CHS0 | GO/DONE | ADON |
     MOVWF   ADCON0
     BANKSEL ADCON1		; select the reference voltage source (VDD and VSS)
-    MOVLW   0b00000000		; ADFM - xx - VCFG1 - VCFG0 - xx - xx - xx - xx
+    MOVLW   0b00000000		; | ADFM | xx | VCFG1 | VCFG0 | xx | xx | xx | xx |
     MOVWF   ADCON1
 
 ; main program loop
@@ -99,31 +101,31 @@ main:
     GOTO    turnOffLEDs
     BTFSC   STATUS, 2
     GOTO    $+5
-    BTFSS   STATUS, 0		; if the result is positive, turn on the LED in RB0
-    CALL    turnOnLEDRB0
-    BTFSC   STATUS, 0		; if the result is negative, turn on the LED in RB1
-    CALL    turnOnLEDRB1
+    BTFSS   STATUS, 0		; if the result is positive, turn on the LED in RC0
+    CALL    turnOnLEDRC0
+    BTFSC   STATUS, 0		; if the result is negative, turn on the LED in RC1
+    CALL    turnOnLEDRC1
     
     GOTO    main
 
 ; subroutine to turn off all LEDs
 turnOffLEDs:
     MOVLW   0b00000000
-    MOVWF   PORTB
+    MOVWF   PORTC
     
     RETURN
 
-; subroutine to light the LED in RB0
-turnOnLEDRB0:
+; subroutine to light the LED in RC0
+turnOnLEDRC0:
     MOVLW   0b00000001
-    MOVWF   PORTB
+    MOVWF   PORTC
     
     RETURN
 
-; subroutine to light the LED in RB1
-turnOnLEDRB1:
+; subroutine to light the LED in RC1
+turnOnLEDRC1:
     MOVLW   0b00000010
-    MOVWF   PORTB
+    MOVWF   PORTC
     
     RETURN
 
